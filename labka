@@ -1,1 +1,43 @@
 
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report, accuracy_score
+
+# Загрузка датасета
+df = pd.read_csv("ai4i2020.csv")
+
+# Удаляем идентификаторы
+df = df.drop(columns=["UDI", "Product ID"], errors="ignore")
+
+# Кодируем категориальный признак Type
+df = pd.get_dummies(df, columns=["Type"], drop_first=True)
+
+# Целевая переменная
+y = df["Machine failure"]
+
+# Признаки
+X = df.drop(columns=["Machine failure"])
+
+# Разделение выборки
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+
+# Модель
+model = RandomForestClassifier(
+    n_estimators=100,
+    random_state=42,
+    class_weight="balanced"
+)
+
+# Обучение
+model.fit(X_train, y_train)
+
+# Предсказание
+y_pred = model.predict(X_test)
+
+# Оценка
+print("Accuracy:", accuracy_score(y_test, y_pred))
+print("\nClassification report:\n")
+print(classification_report(y_test, y_pred))
